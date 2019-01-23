@@ -2,6 +2,7 @@ import os
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
+import pymysql
 
 
 os.system('adb shell date "+%D.%T" > log.txt')
@@ -18,6 +19,39 @@ os.system("adb logcat -t '" + required_time[5:] + "' > log.txt")
 
 f = open('log.txt', 'r')
 lines = f.read().split('\n')
+f.close()
+
+db = pymysql.connect("localhost", 'root', 'Lcl19940119.', 'first')
+cursor = db.cursor()
+create_table = "CREATE TABLE LOG_ANALYTICS (time CHAR(20) NOT NULL, filter CHAR(1) NOT NULL, process CHAR(20) NOT NULL)"
+cursor.execute("DROP TABLE IF EXISTS LOG_ANALYTICS")
+
+try:
+    cursor.execute(create_table)
+    db.commit()
+except:
+    print("error")
+    db.rollback()
+    cursor.close()
+    db.close()
+    quit()
+
+insert = "INSERT INTO LOG_ANALYTICS(time, filter, process) VALUES ('%s', '%s', '%s')"
+
+for line in lines:
+    word = line.split()
+    try:
+        cursor.execute(insert % (word[0]+" "+word[1], word[4], word[5]))
+        db.commit()
+    except:
+        db.rollback()
+
+cursor.close()
+db.close()
+
+
+
+
 error_cnt = 0
 warning_cnt = 0
 info_cnt = 0
@@ -25,6 +59,7 @@ debug_cnt = 0
 fatal_error_cnt = 0
 verbose_cnt = 0
 r_cnt = 0
+
 
 for line in lines:
     if " W " in line:
@@ -51,7 +86,7 @@ plt.xticks(y_pos, objects)
 plt.ylabel('frequency')
 
 plt.title('Logcat Analytics')
-plt.savefig('log_analytics.jpg')
+plt.savefig('log_analytics.png')
 plt.show()
 
 
