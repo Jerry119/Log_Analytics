@@ -21,7 +21,7 @@ f = open('log.txt', 'r')
 lines = f.read().split('\n')
 f.close()
 
-db = pymysql.connect("localhost", 'root', 'Lcl19940119.', 'first')
+db = pymysql.connect("localhost", 'root', password, 'first')
 cursor = db.cursor()
 create_table = "CREATE TABLE LOG_ANALYTICS (time CHAR(20) NOT NULL, filter CHAR(1) NOT NULL, process CHAR(20) NOT NULL)"
 cursor.execute("DROP TABLE IF EXISTS LOG_ANALYTICS")
